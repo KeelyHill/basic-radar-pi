@@ -35,6 +35,7 @@
 			<br>
 			<div id="temp" style="font-size:3em;">--</div>
 			<div id="text-sum" style="font-size:2.3em;">--</div>
+			<div id="city" style="font-size:1em;margin-top:5px;">--</div>
 		</div>
 	</body>
 
@@ -47,10 +48,10 @@
 
 		var MINS_FOR_UPDATE = 10; // time between data refresh requests
 
-
 		var radargif = document.getElementById("radar-gif");
 		var tempDiv = document.getElementById("temp");
 		var textSumDiv = document.getElementById("text-sum");
+		var cityDiv = document.getElementById("city");
 
 
 		function refreshData() {
@@ -75,6 +76,8 @@
 
 				tempDiv.innerHTML = temp + ' &deg;C';
 				textSumDiv.innerHTML = results['item']['condition']['text'];
+
+				cityDiv.innerHTML = results['location']['city']
 
 			  } else {
 			    // We reached our target server, but it returned an error
