@@ -1,0 +1,103 @@
+<html>
+
+	<head>
+
+		<title>Basic Radar Pi</title>
+
+		<style>
+
+			html {
+				background: black;
+				height: 100%;
+				color: #eee;
+				font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif
+			}
+
+			.container {
+				text-align: center;
+				height: 100%;
+				/*margin: 0 auto;*/
+			}
+
+			#radar-gif {
+				max-height: 80%;
+			}
+
+		</style>
+
+	</head>
+
+
+	<body>
+
+		<div class="container">
+			<img id="radar-gif"/>
+			<br>
+			<div id="temp" style="font-size:3em;">--</div>
+			<div id="text-sum" style="font-size:2.3em;">--</div>
+		</div>
+	</body>
+
+
+	<script>
+
+		/****** Change these to the location as desired. ******/
+		var woeid = 0000000; // google it
+		var gif_url_raw = "http://radar.weather.gov/ridge/Conus/Loop/NatLoop.gif"; // see 'radar.weather.gov/ridge/Conus/Loop' for list
+
+		var MINS_FOR_UPDATE = 10; // time between data refresh requests
+
+
+		var radargif = document.getElementById("radar-gif");
+		var tempDiv = document.getElementById("temp");
+		var textSumDiv = document.getElementById("text-sum");
+
+
+		function refreshData() {
+
+			// update the radar gif
+			radargif.src = gif_url_raw + '?' + new Date().getTime(); // add a 'version id' (the time) to get image to update
+			var url = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%3D' + woeid + '&format=json';
+
+			// update other data
+
+			var request = new XMLHttpRequest();
+			request.open('GET', url, true);
+
+			request.onload = function() {
+			  if (request.status >= 200 && request.status < 400) {
+			    // Success!
+			    var data = JSON.parse(request.responseText);
+
+				var results = data['query']['results']['channel'];
+
+				var temp = toCandString(results['item']['condition']['temp']);
+
+				tempDiv.innerHTML = temp + ' &deg;C';
+				textSumDiv.innerHTML = results['item']['condition']['text'];
+
+			  } else {
+			    // We reached our target server, but it returned an error
+			  }
+			};
+
+			request.onerror = function() {
+			  // There was a connection error of some sort
+			};
+
+			request.send();
+		}
+
+		function toCandString(temp) {
+			return '' + Math.round((parseInt(temp) - 32) / 1.8);
+		}
+
+
+		window.onload = function () {
+			refreshData(); // run on load
+			setInterval(refreshData, MINS_FOR_UPDATE * 60000);
+		}
+
+	</script>
+
+</html>
