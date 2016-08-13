@@ -20,7 +20,7 @@
 			}
 
 			#radar-gif {
-				max-height: 80%;
+				max-height: 70%;
 			}
 
 		</style>
@@ -31,6 +31,8 @@
 	<body>
 
 		<div class="container">
+			<div id="time" style="font-size:2.0em;"></div>
+			<br>
 			<img id="radar-gif"/>
 			<br>
 			<div id="temp" style="font-size:3em;">--</div>
@@ -49,6 +51,7 @@
 		var MINS_FOR_UPDATE = 10; // time between data refresh requests
 
 		var radargif = document.getElementById("radar-gif");
+		var timeDiv = document.getElementById("time");
 		var tempDiv = document.getElementById("temp");
 		var textSumDiv = document.getElementById("text-sum");
 		var cityDiv = document.getElementById("city");
@@ -95,10 +98,29 @@
 			return '' + Math.round((parseInt(temp) - 32) / 1.8);
 		}
 
+		function fuzztime(d){
+			d=(d)?d:new Date();
+			var t = [, "it's", "right after", "about", "o'clock", "quarter", "to", "past", "half", "sharp", "a"],
+				h = ["twelve", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven"],
+				m = [0,d.getMinutes(),d.getHours()],s=[]; m[0]=m[1]%7.5; s[0]=t[1];
+			s.push( (m[0]==0)? t[0]:(m[0]==parseInt(m[0]))?t[2]:t[3]);
+			s.push( (m[1]>53)? [h[(m[2]+1)%12],  t[4]           ] :
+			        (m[1]>37)? [t[10],t[5],t[6], h[(m[2]+1)%12] ] :
+			        (m[1]>23)? [t[8],            h[m[2]%12]     ] :
+			        (m[1]>7 )? [t[10],t[5],t[7], h[m[2]%12]     ] :
+			        (m[1]>0 )? [h[m[2]%12],      t[4]           ] :
+					   [h[m[2]%12],t[4], t[9]           ]);
+			return s.toString().replace(/,/gi," "); }
+
 
 		window.onload = function () {
 			refreshData(); // run on load
 			setInterval(refreshData, MINS_FOR_UPDATE * 60000);
+
+			timeDiv.innerHTML = fuzztime();
+			setInterval(function(){
+				timeDiv.innerHTML = fuzztime();
+			}, 2 * 60000);
 		}
 
 	</script>
